@@ -4,39 +4,24 @@ A plugin that brings back the nostalgic sounds of the dial-up internet era to yo
 
 ## Installation
 
-### Option 1: Add as a marketplace (Recommended)
+### Option 1: Marketplace (Recommended)
 
 ```bash
 # Add this repo as a plugin marketplace
 /plugin marketplace add jamstop/claude-code-nostalgia-sounds
 
 # Install the plugin
-/plugin install nostalgia-sounds@jamstop-claude-code-nostalgia-sounds
+/plugin install nostalgia-sounds@nostalgia-sounds-marketplace
 ```
 
-### Option 2: Clone locally
+### Option 2: Development / Testing
 
 ```bash
 # Clone the repository
-git clone https://github.com/jamstop/claude-code-nostalgia-sounds.git ~/.claude/plugins/local/nostalgia-sounds
-
-# Enable the plugin in your settings
-# Add to ~/.claude/settings.json:
-{
-  "enabledPlugins": {
-    "nostalgia-sounds@local": true
-  }
-}
-```
-
-### Option 3: Test with --plugin-dir
-
-```bash
-# Clone anywhere
 git clone https://github.com/jamstop/claude-code-nostalgia-sounds.git ~/nostalgia-sounds
 
-# Run Claude with the plugin
-claude --plugin-dir ~/nostalgia-sounds
+# Run Claude with the plugin (point to the plugin subdirectory)
+claude --plugin-dir ~/nostalgia-sounds/plugins/nostalgia-sounds
 ```
 
 After installation, restart Claude Code.
@@ -57,16 +42,17 @@ Choose from several nostalgic sound packs:
 ### Changing Sound Packs
 
 ```bash
+# Find your plugin installation (marketplace installs to ~/.claude/plugins/marketplaces/)
+PLUGIN_DIR=$(find ~/.claude/plugins -name "nostalgia-sounds" -type d | grep -v cache | head -1)
+
 # List available packs
-~/.claude/plugins/local/nostalgia-sounds/scripts/set-pack.sh
+$PLUGIN_DIR/scripts/set-pack.sh
 
 # Switch to a pack
-~/.claude/plugins/local/nostalgia-sounds/scripts/set-pack.sh nintendo
-~/.claude/plugins/local/nostalgia-sounds/scripts/set-pack.sh sega
-~/.claude/plugins/local/nostalgia-sounds/scripts/set-pack.sh default
+$PLUGIN_DIR/scripts/set-pack.sh nintendo
 ```
 
-Or edit `config.json` directly:
+Or edit `config.json` directly in the plugin directory:
 ```json
 {
   "activePack": "nintendo"
@@ -90,10 +76,9 @@ Or edit `config.json` directly:
 
 ## Testing
 
-Run the test suite to verify everything is working:
-
 ```bash
-~/.claude/plugins/local/nostalgia-sounds/test.sh
+# Run the test suite
+./plugins/nostalgia-sounds/test.sh
 ```
 
 For live debugging:
@@ -156,30 +141,34 @@ wait $PID
 
 Then use `claude-sounds` instead of `claude`, or alias it.
 
-## File Structure
+## Repository Structure
 
 ```
-nostalgia-sounds/
+claude-code-nostalgia-sounds/
 ├── .claude-plugin/
-│   └── plugin.json            # Plugin manifest
-├── config.json                # Sound pack configuration
-├── test.sh                    # Test suite
-├── hooks/
-│   └── hooks.json             # Hook configuration
-├── scripts/
-│   ├── get-sound.sh           # Helper to get sound paths
-│   ├── set-pack.sh            # CLI to change packs
-│   ├── play-dialup.sh         # Thinking sounds
-│   ├── play-done.sh           # Done sound
-│   ├── play-mail.sh           # Notification sound
-│   ├── play-session-start.sh  # Startup sound
-│   └── play-session-end.sh    # Shutdown sound
-└── sounds/
-    ├── dialup.mp3
-    ├── jeopardy_think_real.mp3
-    ├── youve_got_mail.mp3
-    ├── winxp_startup.mp3
-    └── ...                    # 30+ sound files
+│   └── marketplace.json       # Marketplace definition
+├── README.md
+└── plugins/
+    └── nostalgia-sounds/      # The actual plugin
+        ├── .claude-plugin/
+        │   └── plugin.json    # Plugin manifest
+        ├── config.json        # Sound pack configuration
+        ├── test.sh            # Test suite
+        ├── hooks/
+        │   └── hooks.json     # Hook configuration
+        ├── scripts/
+        │   ├── get-sound.sh
+        │   ├── set-pack.sh
+        │   ├── play-dialup.sh
+        │   ├── play-done.sh
+        │   ├── play-mail.sh
+        │   ├── play-session-start.sh
+        │   └── play-session-end.sh
+        └── sounds/
+            ├── dialup.mp3
+            ├── jeopardy_think_real.mp3
+            ├── youve_got_mail.mp3
+            └── ...            # 30+ sound files
 ```
 
 ## Platform Support
@@ -194,12 +183,16 @@ nostalgia-sounds/
 
 ### No sounds at all
 1. Verify `afplay` is available: `which afplay`
-2. Check sound files: `ls ~/.claude/plugins/local/nostalgia-sounds/sounds/`
-3. Run tests: `./test.sh`
-4. Check hooks are loaded: `/hooks` in Claude Code
+2. Run `claude --debug` to see if hooks are firing
+3. Check `/hooks` in Claude Code to see registered hooks
+4. Run `./plugins/nostalgia-sounds/test.sh`
 
 ### Sounds playing twice
-Remove any duplicate hook definitions from `~/.claude/settings.json`
+You may have duplicate plugin installations. Check:
+```bash
+/plugin list
+```
+Uninstall duplicates if present.
 
 ### Can't change sound packs
 Install jq: `brew install jq`
