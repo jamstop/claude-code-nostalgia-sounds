@@ -3,8 +3,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOUND_FILE=$("$SCRIPT_DIR/get-sound.sh" done 2>/dev/null)
 PID_FILE="/tmp/claude-nostalgia-thinking.pid"
+STOP_FILE="/tmp/claude-nostalgia-stop"
 
 command -v afplay &>/dev/null || exit 0
+
+# Set stop flag to break the loop
+touch "$STOP_FILE"
 
 # Kill thinking sounds (subshell + afplay)
 if [ -f "$PID_FILE" ]; then

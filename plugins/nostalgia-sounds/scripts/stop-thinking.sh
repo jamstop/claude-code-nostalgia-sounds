@@ -1,6 +1,10 @@
 #!/bin/bash
 # Stop thinking sounds (without playing done sound)
 PID_FILE="/tmp/claude-nostalgia-thinking.pid"
+STOP_FILE="/tmp/claude-nostalgia-stop"
+
+# Set stop flag to break the loop
+touch "$STOP_FILE"
 
 # Kill thinking sounds (subshell + afplay)
 if [ -f "$PID_FILE" ]; then
