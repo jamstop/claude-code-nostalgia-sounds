@@ -32,14 +32,14 @@ By default, **Random Mode is enabled**. Each sound event picks a random sound fr
 
 | Event | When it plays | Example sounds |
 |-------|---------------|----------------|
-| **startup** | Session start | Windows XP, Mac, GameBoy, PS1, SEGA |
-| **shutdown** | Session end | Windows shutdown sounds |
-| **thinking** | User submits prompt | Dialup modem sounds |
-| **thinkingLoop** | While Claude thinks | Jeopardy thinking music |
-| **done** | Claude finishes | "You've Got Mail!", Zelda secret, Mario coin |
-| **notification** | Claude notifications | Various alert sounds |
+| **startup** | Session start | Windows XP, Mac, GameBoy, PS1, SEGA, vinyl scratch |
+| **shutdown** | Session end | Windows shutdown, record scratch |
+| **thinking** | User submits prompt | Dialup modem, vinyl scratch |
+| **thinkingLoop** | While Claude thinks | Jeopardy, elevator music, bossa nova, smooth jazz, trap beats |
+| **done** | Claude finishes | "You've Got Mail!", Zelda secret, air horn, bass drop |
+| **notification** | Claude notifications | Various alert sounds, air horn |
 
-In random mode, thinking plays ONE sound (either a dialup OR jeopardy, not both).
+In random mode, thinking plays a dialup/vinyl sound followed by a random thinking loop (jeopardy, jazz, trap, etc.).
 
 ## Adding New Sounds
 
@@ -120,6 +120,8 @@ If you disable random mode, you can use curated sound packs instead:
 | Pack | Description |
 |------|-------------|
 | **default** | 90s Internet - Dial-up modems, Windows XP, AOL |
+| **lounge** | Lounge & Jazz - Smooth elevator music, bossa nova, jazz vibes |
+| **dj** | DJ / 808 - Air horns, bass drops, trap beats |
 | **nintendo** | Classic Nintendo - GameBoy startup, Zelda secret, Mario coins |
 | **sega** | Sega Genesis - SEGA! Sonic rings |
 | **mac** | Classic Mac - Macintosh startup sounds |
