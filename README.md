@@ -2,6 +2,45 @@
 
 A plugin that brings back the nostalgic sounds of the dial-up internet era to your Claude Code experience.
 
+## Installation
+
+### Option 1: Add as a marketplace (Recommended)
+
+```bash
+# Add this repo as a plugin marketplace
+/plugin marketplace add jamstop/claude-code-nostalgia-sounds
+
+# Install the plugin
+/plugin install nostalgia-sounds@jamstop-claude-code-nostalgia-sounds
+```
+
+### Option 2: Clone locally
+
+```bash
+# Clone the repository
+git clone https://github.com/jamstop/claude-code-nostalgia-sounds.git ~/.claude/plugins/local/nostalgia-sounds
+
+# Enable the plugin in your settings
+# Add to ~/.claude/settings.json:
+{
+  "enabledPlugins": {
+    "nostalgia-sounds@local": true
+  }
+}
+```
+
+### Option 3: Test with --plugin-dir
+
+```bash
+# Clone anywhere
+git clone https://github.com/jamstop/claude-code-nostalgia-sounds.git ~/nostalgia-sounds
+
+# Run Claude with the plugin
+claude --plugin-dir ~/nostalgia-sounds
+```
+
+After installation, restart Claude Code.
+
 ## Sound Packs
 
 Choose from several nostalgic sound packs:
@@ -44,21 +83,10 @@ Or edit `config.json` directly:
 | **Done** | "You've Got Mail!" | AOL mail notification when Claude finishes |
 | **Notification** | "You've Got Mail!" | Plays on Claude notifications |
 
-## Installation
+## Requirements
 
-The plugin is already installed at `~/.claude/plugins/local/nostalgia-sounds/`.
-
-To enable it, ensure your `~/.claude/settings.json` includes:
-
-```json
-{
-  "enabledPlugins": {
-    "nostalgia-sounds@local": true
-  }
-}
-```
-
-**Important:** Do NOT add hooks to `settings.json` - they're already defined in the plugin's `hooks/hooks.json`. Adding them to both places will cause sounds to play twice.
+- **macOS** (uses `afplay` for audio playback)
+- **jq** (for sound pack switching): `brew install jq`
 
 ## Testing
 
@@ -101,89 +129,57 @@ Then add your sound files to the `sounds/` directory.
 
 ### Ctrl+C Interrupt Detection
 
-**The `Stop` hook does not fire on user interrupts.** This is a documented Claude Code limitation:
+**The `Stop` hook does not fire on user interrupts.** This is a documented Claude Code limitation.
 
-> "Stop: Runs when the main Claude Code agent has finished responding. **Does not run if the stoppage occurred due to a user interrupt.**"
-
-This means when you press Ctrl+C:
-- The thinking sounds (dial-up/jeopardy) will continue playing
-- No interrupt sound will play
+When you press Ctrl+C:
+- The thinking sounds will continue playing
 - Sounds will stop on your next prompt submission
 
 ### Workaround: Wrapper Script
 
-To properly handle Ctrl+C interrupts, use a wrapper script that traps the signal:
-
 ```bash
 #!/bin/bash
 # Save as: ~/bin/claude-sounds
-# Make executable: chmod +x ~/bin/claude-sounds
-# Usage: claude-sounds (instead of claude)
+# chmod +x ~/bin/claude-sounds
 
-SOUNDS_DIR="$HOME/.claude/plugins/local/nostalgia-sounds/sounds"
-INTERRUPT_SOUND="$SOUNDS_DIR/error.wav"
-
-cleanup_on_interrupt() {
-    # Kill all plugin sounds immediately
+cleanup() {
     pkill -9 -f "afplay.*nostalgia-sounds" 2>/dev/null
-
-    # Play interrupt sound
-    [ -f "$INTERRUPT_SOUND" ] && afplay "$INTERRUPT_SOUND" &>/dev/null &
-
-    # Forward interrupt to Claude
-    kill -INT "$CLAUDE_PID" 2>/dev/null
+    kill -INT "$PID" 2>/dev/null
     exit 130
 }
+trap cleanup SIGINT SIGTERM
 
-trap cleanup_on_interrupt SIGINT SIGTERM
-
-# Start Claude in background
 claude "$@" &
-CLAUDE_PID=$!
-
-# Wait for Claude to finish
-wait $CLAUDE_PID
-EXIT_CODE=$?
-
-# Check if Claude was interrupted (exit code 130 = SIGINT)
-if [ $EXIT_CODE -eq 130 ]; then
-    pkill -9 -f "afplay.*nostalgia-sounds" 2>/dev/null
-    [ -f "$INTERRUPT_SOUND" ] && afplay "$INTERRUPT_SOUND" &>/dev/null &
-fi
-
-exit $EXIT_CODE
+PID=$!
+wait $PID
 ```
 
-Then either:
-- Use `claude-sounds` instead of `claude`
-- Or add an alias to your shell profile: `alias claude='~/bin/claude-sounds'`
+Then use `claude-sounds` instead of `claude`, or alias it.
 
 ## File Structure
 
 ```
 nostalgia-sounds/
-├── README.md                  # This file
+├── .claude-plugin/
+│   └── plugin.json            # Plugin manifest
 ├── config.json                # Sound pack configuration
 ├── test.sh                    # Test suite
 ├── hooks/
 │   └── hooks.json             # Hook configuration
 ├── scripts/
-│   ├── get-sound.sh           # Helper to get sound paths from config
-│   ├── set-pack.sh            # CLI to change sound packs
-│   ├── play-dialup.sh         # Thinking sounds on prompt submit
-│   ├── play-done.sh           # Done sound on completion
+│   ├── get-sound.sh           # Helper to get sound paths
+│   ├── set-pack.sh            # CLI to change packs
+│   ├── play-dialup.sh         # Thinking sounds
+│   ├── play-done.sh           # Done sound
 │   ├── play-mail.sh           # Notification sound
 │   ├── play-session-start.sh  # Startup sound
 │   └── play-session-end.sh    # Shutdown sound
 └── sounds/
-    ├── dialup.mp3             # Dial-up modem sound
+    ├── dialup.mp3
     ├── jeopardy_think_real.mp3
     ├── youve_got_mail.mp3
     ├── winxp_startup.mp3
-    ├── winxp_shutdown.mp3
-    ├── mario_coin.wav
-    ├── zelda_secret.wav
-    └── ...                    # Many more!
+    └── ...                    # 30+ sound files
 ```
 
 ## Platform Support
@@ -191,31 +187,23 @@ nostalgia-sounds/
 | Platform | Status | Notes |
 |----------|--------|-------|
 | macOS | Full support | Uses `afplay` |
-| Linux | Not supported | Would need `paplay` or similar |
-| Windows | Not supported | Would need different audio player |
+| Linux | Not supported | Would need `paplay` |
+| Windows | Not supported | Would need different player |
 
 ## Troubleshooting
 
-### Sounds playing twice
-Remove any `hooks` section from `~/.claude/settings.json`. The plugin's `hooks/hooks.json` should be the only source.
-
 ### No sounds at all
-1. Check plugin is enabled: `"nostalgia-sounds@local": true` in settings
-2. Verify `afplay` is available (macOS only)
-3. Check sound files exist: `ls ~/.claude/plugins/local/nostalgia-sounds/sounds/`
-4. Run `./test.sh` to diagnose issues
+1. Verify `afplay` is available: `which afplay`
+2. Check sound files: `ls ~/.claude/plugins/local/nostalgia-sounds/sounds/`
+3. Run tests: `./test.sh`
+4. Check hooks are loaded: `/hooks` in Claude Code
 
-### Sounds don't stop on Ctrl+C
-This is expected - see [Known Limitations](#known-limitations). Use the wrapper script.
+### Sounds playing twice
+Remove any duplicate hook definitions from `~/.claude/settings.json`
 
-### Startup/shutdown sounds not playing
-Restart Claude Code - hooks are loaded at startup.
-
-## Related Links
-
-- [Claude Code Hooks Reference](https://code.claude.com/docs/en/hooks)
-- [Feature Request: UserInterrupt Hook](https://github.com/anthropics/claude-code/issues/9516)
+### Can't change sound packs
+Install jq: `brew install jq`
 
 ## License
 
-MIT - Do whatever you want with it.
+MIT
