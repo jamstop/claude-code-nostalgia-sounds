@@ -39,6 +39,39 @@ if ! command -v jq &>/dev/null; then
     exit 0
 fi
 
+# Check if random mode is enabled
+RANDOM_MODE=$(jq -r '.randomMode // false' "$CONFIG_FILE")
+
+if [ "$RANDOM_MODE" = "true" ]; then
+    # Random mode: pick from category
+    CATEGORY="$EVENT"
+
+    # Map thinking index to category
+    if [ "$EVENT" = "thinking" ]; then
+        if [ "$INDEX" = "0" ]; then
+            CATEGORY="thinking"
+        else
+            CATEGORY="thinkingLoop"
+        fi
+    fi
+
+    # Get sounds array for category
+    SOUNDS_JSON=$(jq -r --arg cat "$CATEGORY" '.soundCategories[$cat] // []' "$CONFIG_FILE")
+    COUNT=$(echo "$SOUNDS_JSON" | jq 'length')
+
+    if [ "$COUNT" -gt 0 ]; then
+        # Use bash RANDOM for proper randomization
+        RAND_INDEX=$((RANDOM % COUNT))
+        SOUND=$(echo "$SOUNDS_JSON" | jq -r ".[$RAND_INDEX]")
+
+        if [ -n "$SOUND" ] && [ "$SOUND" != "null" ]; then
+            echo "$SOUNDS_DIR/$SOUND"
+            exit 0
+        fi
+    fi
+    # Fall through to pack-based lookup if category not found
+fi
+
 # Get active pack
 ACTIVE_PACK=$(jq -r '.activePack // "default"' "$CONFIG_FILE")
 

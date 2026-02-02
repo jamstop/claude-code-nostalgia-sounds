@@ -1,5 +1,59 @@
 {
   "activePack": "default",
+  "randomMode": false,
+  "soundCategories": {
+    "startup": [
+      "gameboy_startup.wav",
+      "intel_bong.wav",
+      "mac_startup.wav",
+      "ps1_startup.wav",
+      "sega.wav",
+      "vista_startup.mp3",
+      "win95_startup.wav",
+      "win98_startup.mp3",
+      "winxp_startup.mp3"
+    ],
+    "shutdown": [
+      "mac_sosumi.wav",
+      "switch_click.wav",
+      "vista_shutdown.mp3",
+      "win95_shutdown.wav",
+      "winxp_shutdown.mp3"
+    ],
+    "thinking": [
+      "dialup.mp3",
+      "dialup_15s.mp3"
+    ],
+    "thinkingLoop": [
+      "jeopardy_think_full.mp3",
+      "jeopardy_think_real.mp3",
+      "jeopardy_thinking_full.mp3",
+      "jeopardy_thinking_long.mp3",
+      "jeopardy_thinking.mp3"
+    ],
+    "done": [
+      "ding.wav",
+      "mac_sosumi.wav",
+      "mac_wildeep.wav",
+      "mario_coin.wav",
+      "mgs_alert.wav",
+      "msn_nudge.wav",
+      "sonic_ring.wav",
+      "tada.wav",
+      "youve_got_mail.mp3",
+      "zelda_secret.wav"
+    ],
+    "notification": [
+      "ding.wav",
+      "mac_sosumi.wav",
+      "mac_wildeep.wav",
+      "mario_coin.wav",
+      "mgs_alert.wav",
+      "msn_nudge.wav",
+      "sonic_ring.wav",
+      "youve_got_mail.mp3"
+    ]
+  },
   "packs": {
     "default": {
       "name": "Default (90s Internet)",
@@ -7,7 +61,10 @@
       "sounds": {
         "startup": "winxp_startup.mp3",
         "shutdown": "winxp_shutdown.mp3",
-        "thinking": ["dialup.mp3", "jeopardy_think_real.mp3"],
+        "thinking": [
+          "dialup.mp3",
+          "jeopardy_think_real.mp3"
+        ],
         "done": "youve_got_mail.mp3",
         "notification": "youve_got_mail.mp3"
       }
@@ -18,7 +75,10 @@
       "sounds": {
         "startup": "gameboy_startup.wav",
         "shutdown": "switch_click.wav",
-        "thinking": ["dialup.mp3", "jeopardy_think_real.mp3"],
+        "thinking": [
+          "dialup.mp3",
+          "jeopardy_think_real.mp3"
+        ],
         "done": "zelda_secret.wav",
         "notification": "mario_coin.wav"
       }
@@ -29,7 +89,10 @@
       "sounds": {
         "startup": "sega.wav",
         "shutdown": "switch_click.wav",
-        "thinking": ["dialup.mp3", "jeopardy_think_real.mp3"],
+        "thinking": [
+          "dialup.mp3",
+          "jeopardy_think_real.mp3"
+        ],
         "done": "sonic_ring.wav",
         "notification": "sonic_ring.wav"
       }
@@ -40,7 +103,10 @@
       "sounds": {
         "startup": "mac_startup.wav",
         "shutdown": "mac_sosumi.wav",
-        "thinking": ["dialup.mp3", "jeopardy_think_real.mp3"],
+        "thinking": [
+          "dialup.mp3",
+          "jeopardy_think_real.mp3"
+        ],
         "done": "mac_sosumi.wav",
         "notification": "mac_wildeep.wav"
       }
@@ -51,7 +117,10 @@
       "sounds": {
         "startup": "win95_startup.wav",
         "shutdown": "win95_shutdown.wav",
-        "thinking": ["dialup.mp3", "jeopardy_think_real.mp3"],
+        "thinking": [
+          "dialup.mp3",
+          "jeopardy_think_real.mp3"
+        ],
         "done": "tada.wav",
         "notification": "ding.wav"
       }
@@ -62,7 +131,10 @@
       "sounds": {
         "startup": "ps1_startup.wav",
         "shutdown": "switch_click.wav",
-        "thinking": ["dialup.mp3", "jeopardy_think_real.mp3"],
+        "thinking": [
+          "dialup.mp3",
+          "jeopardy_think_real.mp3"
+        ],
         "done": "mgs_alert.wav",
         "notification": "mgs_alert.wav"
       }
