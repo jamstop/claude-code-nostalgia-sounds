@@ -1,11 +1,16 @@
 #!/bin/bash
 # Play thinking sounds (e.g., dial-up then Jeopardy)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SOUND_1=$("$SCRIPT_DIR/get-sound.sh" thinking 0 2>/dev/null)
-SOUND_2=$("$SCRIPT_DIR/get-sound.sh" thinking 1 2>/dev/null)
+CONFIG_FILE="$SCRIPT_DIR/../config.json"
 PID_FILE="/tmp/claude-nostalgia-thinking.pid"
 
 command -v afplay &>/dev/null || exit 0
+
+# Check if random mode is enabled
+RANDOM_MODE="false"
+if command -v jq &>/dev/null && [ -f "$CONFIG_FILE" ]; then
+    RANDOM_MODE=$(jq -r '.randomMode // false' "$CONFIG_FILE")
+fi
 
 # Kill any existing thinking sounds (subshell + afplay)
 if [ -f "$PID_FILE" ]; then
@@ -21,12 +26,33 @@ fi
 # Also kill any stray afplay processes from this plugin
 pkill -9 -f "afplay.*nostalgia-sounds" 2>/dev/null || true
 
-# Play sounds in sequence in background
-(
-    [ -n "$SOUND_1" ] && [ -f "$SOUND_1" ] && afplay "$SOUND_1" 2>/dev/null
-    [ -n "$SOUND_2" ] && [ -f "$SOUND_2" ] && afplay "$SOUND_2" 2>/dev/null
-    rm -f "$PID_FILE"
-) &
-echo $! > "$PID_FILE"
+if [ "$RANDOM_MODE" = "true" ]; then
+    # Random mode: pick ONE sound from either thinking or thinkingLoop
+    # 50/50 chance of either category
+    if [ $((RANDOM % 2)) -eq 0 ]; then
+        SOUND=$("$SCRIPT_DIR/get-sound.sh" thinking 0 2>/dev/null)
+    else
+        SOUND=$("$SCRIPT_DIR/get-sound.sh" thinking 1 2>/dev/null)
+    fi
+
+    # Play single sound in background
+    (
+        [ -n "$SOUND" ] && [ -f "$SOUND" ] && afplay "$SOUND" 2>/dev/null
+        rm -f "$PID_FILE"
+    ) &
+    echo $! > "$PID_FILE"
+else
+    # Normal mode: play dialup then jeopardy in sequence
+    SOUND_1=$("$SCRIPT_DIR/get-sound.sh" thinking 0 2>/dev/null)
+    SOUND_2=$("$SCRIPT_DIR/get-sound.sh" thinking 1 2>/dev/null)
+
+    # Play sounds in sequence in background
+    (
+        [ -n "$SOUND_1" ] && [ -f "$SOUND_1" ] && afplay "$SOUND_1" 2>/dev/null
+        [ -n "$SOUND_2" ] && [ -f "$SOUND_2" ] && afplay "$SOUND_2" 2>/dev/null
+        rm -f "$PID_FILE"
+    ) &
+    echo $! > "$PID_FILE"
+fi
 
 exit 0
