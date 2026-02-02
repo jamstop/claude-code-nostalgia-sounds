@@ -5,7 +5,6 @@
     "startup": [
       "gameboy_startup.wav",
       "intel_bong.wav",
-      "mac_startup.wav",
       "ps1_startup.wav",
       "sega.wav",
       "vista_startup.mp3",
@@ -33,11 +32,8 @@
     ],
     "done": [
       "ding.wav",
-      "mac_sosumi.wav",
-      "mac_wildeep.wav",
       "mario_coin.wav",
       "mgs_alert.wav",
-      "msn_nudge.wav",
       "sonic_ring.wav",
       "tada.wav",
       "youve_got_mail.mp3",
@@ -45,11 +41,8 @@
     ],
     "notification": [
       "ding.wav",
-      "mac_sosumi.wav",
-      "mac_wildeep.wav",
       "mario_coin.wav",
       "mgs_alert.wav",
-      "msn_nudge.wav",
       "sonic_ring.wav",
       "youve_got_mail.mp3"
     ]
@@ -101,14 +94,14 @@
       "name": "Classic Mac",
       "description": "Apple Macintosh sounds",
       "sounds": {
-        "startup": "mac_startup.wav",
+        "startup": "intel_bong.wav",
         "shutdown": "mac_sosumi.wav",
         "thinking": [
           "dialup.mp3",
           "jeopardy_think_real.mp3"
         ],
-        "done": "mac_sosumi.wav",
-        "notification": "mac_wildeep.wav"
+        "done": "ding.wav",
+        "notification": "ding.wav"
       }
     },
     "windows95": {
