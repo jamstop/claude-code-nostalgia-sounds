@@ -36,7 +36,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "AskUserQuestion",
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
