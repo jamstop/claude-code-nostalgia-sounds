@@ -1,13 +1,13 @@
 #!/bin/bash
-# Play Windows XP shutdown sound when session ends
+# Play "You've Got Mail" when Claude finishes responding
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SHUTDOWN_FILE="$SCRIPT_DIR/../sounds/winxp_shutdown.mp3"
+SOUND_FILE="$SCRIPT_DIR/../sounds/youve_got_mail.mp3"
 SOUNDS_DIR="$SCRIPT_DIR/../sounds"
 
-# Kill any playing sounds first
-pkill -9 -f "afplay.*${SOUNDS_DIR}/" 2>/dev/null || true
+command -v afplay &>/dev/null || exit 0
 
-# Play synchronously - the hook waits for this to complete
-[ -f "$SHUTDOWN_FILE" ] && afplay "$SHUTDOWN_FILE"
+# Kill any playing sounds first (dialup/jeopardy)
+pkill -9 -f "afplay.*nostalgia-sounds" 2>/dev/null || true
 
+[ -f "$SOUND_FILE" ] && afplay "$SOUND_FILE" &>/dev/null &
 exit 0
