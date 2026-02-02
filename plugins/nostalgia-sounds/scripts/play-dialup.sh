@@ -26,33 +26,16 @@ fi
 # Also kill any stray afplay processes from this plugin
 pkill -9 -f "afplay.*nostalgia-sounds" 2>/dev/null || true
 
-if [ "$RANDOM_MODE" = "true" ]; then
-    # Random mode: pick ONE sound from either thinking or thinkingLoop
-    # 50/50 chance of either category
-    if [ $((RANDOM % 2)) -eq 0 ]; then
-        SOUND=$("$SCRIPT_DIR/get-sound.sh" thinking 0 2>/dev/null)
-    else
-        SOUND=$("$SCRIPT_DIR/get-sound.sh" thinking 1 2>/dev/null)
-    fi
+# Get sounds (random mode picks randomly from categories, normal mode uses pack)
+SOUND_1=$("$SCRIPT_DIR/get-sound.sh" thinking 0 2>/dev/null)
+SOUND_2=$("$SCRIPT_DIR/get-sound.sh" thinking 1 2>/dev/null)
 
-    # Play single sound in background
-    (
-        [ -n "$SOUND" ] && [ -f "$SOUND" ] && afplay "$SOUND" 2>/dev/null
-        rm -f "$PID_FILE"
-    ) &
-    echo $! > "$PID_FILE"
-else
-    # Normal mode: play dialup then jeopardy in sequence
-    SOUND_1=$("$SCRIPT_DIR/get-sound.sh" thinking 0 2>/dev/null)
-    SOUND_2=$("$SCRIPT_DIR/get-sound.sh" thinking 1 2>/dev/null)
-
-    # Play sounds in sequence in background
-    (
-        [ -n "$SOUND_1" ] && [ -f "$SOUND_1" ] && afplay "$SOUND_1" 2>/dev/null
-        [ -n "$SOUND_2" ] && [ -f "$SOUND_2" ] && afplay "$SOUND_2" 2>/dev/null
-        rm -f "$PID_FILE"
-    ) &
-    echo $! > "$PID_FILE"
-fi
+# Play dialup then jeopardy in sequence
+(
+    [ -n "$SOUND_1" ] && [ -f "$SOUND_1" ] && afplay "$SOUND_1" 2>/dev/null
+    [ -n "$SOUND_2" ] && [ -f "$SOUND_2" ] && afplay "$SOUND_2" 2>/dev/null
+    rm -f "$PID_FILE"
+) &
+echo $! > "$PID_FILE"
 
 exit 0
