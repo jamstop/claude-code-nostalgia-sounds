@@ -59,6 +59,36 @@ Or edit `config.json` directly in the plugin directory:
 }
 ```
 
+### Random Mode
+
+Enable random mode to have sounds randomly selected from their category (all startup sounds, all shutdown sounds, etc.) instead of using fixed pack assignments:
+
+```bash
+# Enable random mode
+$PLUGIN_DIR/scripts/toggle-random.sh on
+
+# Disable random mode
+$PLUGIN_DIR/scripts/toggle-random.sh off
+
+# Toggle current state
+$PLUGIN_DIR/scripts/toggle-random.sh
+```
+
+Or edit `config.json`:
+```json
+{
+  "randomMode": true
+}
+```
+
+When enabled, each event picks a random sound from its category:
+- **startup**: All startup/boot sounds (Windows, Mac, GameBoy, PS1, etc.)
+- **shutdown**: All shutdown sounds
+- **thinking**: Dialup connection sounds
+- **thinkingLoop**: Jeopardy/waiting music variants
+- **done**: Completion sounds (mail, coins, alerts, etc.)
+- **notification**: Notification sounds
+
 ## Sound Events
 
 | Event | Default Sound | Description |
@@ -159,6 +189,7 @@ claude-code-nostalgia-sounds/
         ├── scripts/
         │   ├── get-sound.sh
         │   ├── set-pack.sh
+        │   ├── toggle-random.sh
         │   ├── play-dialup.sh
         │   ├── play-done.sh
         │   ├── play-mail.sh
