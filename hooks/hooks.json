@@ -6,7 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/play-session-start.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/play-session-start.sh",
+            "async": true
           }
         ]
       }
@@ -16,7 +17,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/play-session-end.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/play-session-end.sh",
+            "async": true
           }
         ]
       }
@@ -26,7 +28,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/play-dialup.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/play-dialup.sh",
+            "async": true
           }
         ]
       }
@@ -36,7 +39,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/play-done.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/play-done.sh",
+            "async": true
           }
         ]
       }
@@ -47,7 +51,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/play-mail.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/play-mail.sh",
+            "async": true
           }
         ]
       }
