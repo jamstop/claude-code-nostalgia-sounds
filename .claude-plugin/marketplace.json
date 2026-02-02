@@ -1,10 +1,14 @@
 {
+  "name": "nostalgia-sounds-marketplace",
+  "owner": {
+    "name": "Jimmy Yue"
+  },
   "plugins": [
     {
       "name": "nostalgia-sounds",
       "description": "Nostalgic sound effects for Claude Code - dial-up modems, Windows XP, AOL 'You've Got Mail', and more",
       "version": "1.0.0",
-      "path": "."
+      "source": "."
     }
   ]
 }
