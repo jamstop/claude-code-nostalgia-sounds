@@ -1,0 +1,71 @@
+{
+  "activePack": "default",
+  "packs": {
+    "default": {
+      "name": "Default (90s Internet)",
+      "description": "Dial-up modems, Windows XP, AOL - the golden age of the internet",
+      "sounds": {
+        "startup": "winxp_startup.mp3",
+        "shutdown": "winxp_shutdown.mp3",
+        "thinking": ["dialup.mp3", "jeopardy_think_real.mp3"],
+        "done": "youve_got_mail.mp3",
+        "notification": "youve_got_mail.mp3"
+      }
+    },
+    "nintendo": {
+      "name": "Nintendo",
+      "description": "Classic Nintendo sound effects",
+      "sounds": {
+        "startup": "gameboy_startup.wav",
+        "shutdown": "switch_click.wav",
+        "thinking": ["dialup.mp3", "jeopardy_think_real.mp3"],
+        "done": "zelda_secret.wav",
+        "notification": "mario_coin.wav"
+      }
+    },
+    "sega": {
+      "name": "Sega Genesis",
+      "description": "SEGA! Sonic rings and more",
+      "sounds": {
+        "startup": "sega.wav",
+        "shutdown": "switch_click.wav",
+        "thinking": ["dialup.mp3", "jeopardy_think_real.mp3"],
+        "done": "sonic_ring.wav",
+        "notification": "sonic_ring.wav"
+      }
+    },
+    "mac": {
+      "name": "Classic Mac",
+      "description": "Apple Macintosh sounds",
+      "sounds": {
+        "startup": "mac_startup.wav",
+        "shutdown": "mac_sosumi.wav",
+        "thinking": ["dialup.mp3", "jeopardy_think_real.mp3"],
+        "done": "mac_sosumi.wav",
+        "notification": "mac_wildeep.wav"
+      }
+    },
+    "windows95": {
+      "name": "Windows 95",
+      "description": "The sound of booting into Windows 95",
+      "sounds": {
+        "startup": "win95_startup.wav",
+        "shutdown": "win95_shutdown.wav",
+        "thinking": ["dialup.mp3", "jeopardy_think_real.mp3"],
+        "done": "tada.wav",
+        "notification": "ding.wav"
+      }
+    },
+    "mgs": {
+      "name": "Metal Gear Solid",
+      "description": "! Alert sounds",
+      "sounds": {
+        "startup": "ps1_startup.wav",
+        "shutdown": "switch_click.wav",
+        "thinking": ["dialup.mp3", "jeopardy_think_real.mp3"],
+        "done": "mgs_alert.wav",
+        "notification": "mgs_alert.wav"
+      }
+    }
+  }
+}

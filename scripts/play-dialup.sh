@@ -1,17 +1,18 @@
 #!/bin/bash
-# Play dial-up modem tone then Jeopardy thinking music
+# Play thinking sounds (e.g., dial-up then Jeopardy)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SOUNDS_DIR="$SCRIPT_DIR/../sounds"
+SOUND_1=$("$SCRIPT_DIR/get-sound.sh" thinking 0 2>/dev/null)
+SOUND_2=$("$SCRIPT_DIR/get-sound.sh" thinking 1 2>/dev/null)
 
 command -v afplay &>/dev/null || exit 0
 
 # Kill any existing nostalgia sounds
 pkill -9 -f "afplay.*nostalgia-sounds" 2>/dev/null || true
 
-# Play dialup then jeopardy in background
+# Play sounds in sequence in background
 (
-    [ -f "$SOUNDS_DIR/dialup.mp3" ] && afplay "$SOUNDS_DIR/dialup.mp3" 2>/dev/null
-    [ -f "$SOUNDS_DIR/jeopardy_think_real.mp3" ] && afplay "$SOUNDS_DIR/jeopardy_think_real.mp3" 2>/dev/null
+    [ -n "$SOUND_1" ] && [ -f "$SOUND_1" ] && afplay "$SOUND_1" 2>/dev/null
+    [ -n "$SOUND_2" ] && [ -f "$SOUND_2" ] && afplay "$SOUND_2" 2>/dev/null
 ) &
 
 exit 0
