@@ -11,7 +11,8 @@
       "win95_startup.wav",
       "win98_startup.mp3",
       "winxp_startup.mp3",
-      "vinyl_scratch.mp3"
+      "vinyl_scratch.mp3",
+      "programmer_startup.mp3"
     ],
     "shutdown": [
       "mac_sosumi.wav",
@@ -19,12 +20,14 @@
       "vista_shutdown.mp3",
       "win95_shutdown.wav",
       "winxp_shutdown.mp3",
-      "record_scratch.mp3"
+      "record_scratch.mp3",
+      "programmer_shutdown.mp3"
     ],
     "thinking": [
       "dialup.mp3",
       "dialup_15s.mp3",
-      "vinyl_scratch.mp3"
+      "vinyl_scratch.mp3",
+      "programmer_thinking.mp3"
     ],
     "thinkingLoop": [
       "jeopardy_think_full.mp3",
@@ -36,7 +39,8 @@
       "bossa_nova.mp3",
       "smooth_jazz.mp3",
       "lounge_music.mp3",
-      "trap_beat.mp3"
+      "trap_beat.mp3",
+      "programmer_thinking_long.mp3"
     ],
     "done": [
       "ding.wav",
@@ -50,7 +54,8 @@
       "bass_drop.mp3",
       "piano_sting.mp3",
       "wow_dj.mp3",
-      "fart.mp3"
+      "fart.mp3",
+      "programmer_done.mp3"
     ],
     "notification": [
       "ding.wav",
@@ -60,7 +65,8 @@
       "youve_got_mail.mp3",
       "air_horn.mp3",
       "wow_dj.mp3",
-      "fart.mp3"
+      "fart.mp3",
+      "programmer_notification.mp3"
     ]
   },
   "packs": {
@@ -188,6 +194,20 @@
         ],
         "done": "fart.mp3",
         "notification": "fart.mp3"
+      }
+    },
+    "programmer": {
+      "name": "Programmer Lore",
+      "description": "It works on my machine, Stack Overflow, and mass merge conflicts",
+      "sounds": {
+        "startup": "programmer_startup.mp3",
+        "shutdown": "programmer_shutdown.mp3",
+        "thinking": [
+          "programmer_thinking.mp3",
+          "programmer_thinking_long.mp3"
+        ],
+        "done": "programmer_done.mp3",
+        "notification": "programmer_notification.mp3"
       }
     }
   }
