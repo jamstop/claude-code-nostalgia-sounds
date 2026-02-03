@@ -128,7 +128,40 @@ To verify marketplace publishing works:
 2. Clear cache: `rm -rf ~/.claude/plugins/cache/nostalgia-sounds-marketplace`
 3. Update marketplace: `/plugin marketplace update nostalgia-sounds-marketplace`
 4. Reinstall: `/plugin install nostalgia-sounds`
-5. Verify version: check `~/.claude/plugins/cache/nostalgia-sounds-marketplace/nostalgia-sounds/*/..claude-plugin/plugin.json`
+5. Verify version: check `~/.claude/plugins/cache/nostalgia-sounds-marketplace/nostalgia-sounds/*/.claude-plugin/plugin.json`
+
+### Auto-Detection Gotcha
+
+**Important:** Claude Code auto-detects plugins when you run it from inside a plugin directory. If you're in this workspace and have the marketplace version enabled, you'll get **double sounds** (both versions load).
+
+**Solutions:**
+
+1. **Test marketplace version from a different directory:**
+   ```bash
+   cd ~
+   claude  # Only marketplace plugin loads
+   ```
+
+2. **Use `--plugin-dir` to force a specific version:**
+   ```bash
+   claude --plugin-dir ./plugins/nostalgia-sounds  # Only this version loads
+   ```
+
+3. **Temporarily rename `.claude-plugin/` during testing:**
+   ```bash
+   mv .claude-plugin .claude-plugin.bak  # Prevents auto-detection
+   claude  # Only marketplace version loads
+   mv .claude-plugin.bak .claude-plugin  # Restore
+   ```
+
+4. **Use git worktrees for isolation:**
+   ```bash
+   # Main worktree for development
+   ~/workspace/nostalgia-sounds/
+
+   # Separate worktree for release testing
+   git worktree add ~/workspace/nostalgia-sounds-release main
+   ```
 
 ### Version Bumping
 Versions are bumped automatically via GitHub Actions on merge to `main`:
