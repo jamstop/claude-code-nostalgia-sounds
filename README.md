@@ -102,14 +102,21 @@ ffmpeg -i my-sound.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -ar 44100 my-sound-norm
 
 ## Configuration
 
+### Finding Your Plugin Directory
+
+```bash
+# For marketplace installs, find your plugin:
+PLUGIN_DIR=$(find ~/.claude/plugins -path "*/nostalgia-sounds/scripts" -type d 2>/dev/null | head -1)
+
+# Verify it was found:
+echo $PLUGIN_DIR
+```
+
 ### Toggle Random Mode
 
 Random mode is **on by default**. To toggle:
 
 ```bash
-# Find your plugin installation
-PLUGIN_DIR=~/.claude/plugins/cache/nostalgia-sounds-marketplace/nostalgia-sounds/*/scripts
-
 # Toggle random mode
 $PLUGIN_DIR/toggle-random.sh
 
@@ -128,6 +135,39 @@ $PLUGIN_DIR/set-pack.sh
 
 # Switch to a pack
 $PLUGIN_DIR/set-pack.sh nintendo
+```
+
+### Health Check
+
+Run the doctor script to check dependencies and configuration:
+
+```bash
+$PLUGIN_DIR/doctor.sh
+```
+
+Example output:
+```
+=== Nostalgia Sounds Plugin - Health Check ===
+
+Dependencies:
+
+✓ afplay (required) - /usr/bin/afplay
+✓ jq (required) - /opt/homebrew/bin/jq
+! sox (optional) - not installed
+    For smooth crossfading between sounds: brew install sox
+! ffmpeg (optional) - not installed
+    For normalizing sound volumes: brew install ffmpeg
+
+Configuration:
+
+✓ User settings - ~/.config/nostalgia-sounds/settings.json
+    randomMode: true
+    activePack: default
+✓ Plugin config - found
+✓ Sounds directory - 32 files
+
+---
+All required dependencies OK!
 ```
 
 ## Sound Packs
@@ -295,6 +335,7 @@ claude-code-nostalgia-sounds/
         ├── scripts/
         │   ├── audio-cmd.sh       # Audio helper functions
         │   ├── audio-manager.sh   # Long-running audio daemon
+        │   ├── doctor.sh          # Health check script
         │   ├── get-sound.sh       # Sound file resolution
         │   ├── set-pack.sh        # Change active pack
         │   ├── toggle-random.sh   # Toggle random mode
