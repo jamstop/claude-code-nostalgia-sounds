@@ -53,6 +53,9 @@ fi
 # Clean up all temp files
 rm -f "$PIPE_FILE" "$STOP_FILE"
 
-# Play shutdown sound
-[ -n "$SOUND_FILE" ] && [ -f "$SOUND_FILE" ] && afplay "$SOUND_FILE" &>/dev/null &
+# Play shutdown sound (disown to survive parent exit)
+if [ -n "$SOUND_FILE" ] && [ -f "$SOUND_FILE" ]; then
+    afplay "$SOUND_FILE" &>/dev/null &
+    disown 2>/dev/null
+fi
 exit 0
