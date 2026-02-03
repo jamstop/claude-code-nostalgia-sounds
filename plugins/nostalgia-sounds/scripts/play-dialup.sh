@@ -4,7 +4,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="$SCRIPT_DIR/../config.json"
 PID_FILE="/tmp/claude-nostalgia-thinking.pid"
 STOP_FILE="/tmp/claude-nostalgia-stop"
-MAX_DURATION=600  # Safety timeout: 10 minutes max
+MAX_DURATION=180  # Safety timeout: 3 minutes max
+PARENT_CHECK_INTERVAL=5  # Check if parent process is alive every N seconds
 
 command -v afplay &>/dev/null || exit 0
 
@@ -57,9 +58,13 @@ rm -f "$STOP_FILE"
 SOUND_1=$("$SCRIPT_DIR/get-sound.sh" thinking 0 2>/dev/null)
 SOUND_2=$("$SCRIPT_DIR/get-sound.sh" thinking 1 2>/dev/null)
 
+# Capture parent PID before forking (this is the Claude process or shell that invoked us)
+INVOKER_PID=$PPID
+
 # Play dialup then loop thinking music until stopped
 (
     START_TIME=$(date +%s)
+    LAST_PARENT_CHECK=$START_TIME
 
     # Play initial "connecting" sound
     [ -n "$SOUND_1" ] && [ -f "$SOUND_1" ] && afplay "$SOUND_1" 2>/dev/null
@@ -72,6 +77,16 @@ SOUND_2=$("$SCRIPT_DIR/get-sound.sh" thinking 1 2>/dev/null)
         # Safety timeout check
         ELAPSED=$(( $(date +%s) - START_TIME ))
         [ $ELAPSED -ge $MAX_DURATION ] && break
+
+        # Periodically check if parent process is still alive (orphan detection)
+        NOW=$(date +%s)
+        if [ $(( NOW - LAST_PARENT_CHECK )) -ge $PARENT_CHECK_INTERVAL ]; then
+            LAST_PARENT_CHECK=$NOW
+            # If parent process died, we're orphaned - clean up and exit
+            if ! kill -0 "$INVOKER_PID" 2>/dev/null; then
+                break
+            fi
+        fi
 
         # In random mode, get a fresh random sound each loop
         if [ "$RANDOM_MODE" = "true" ]; then

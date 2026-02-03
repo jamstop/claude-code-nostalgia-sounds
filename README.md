@@ -248,18 +248,80 @@ For live debugging:
 - Run `claude --debug` to see hook execution
 - Press `Ctrl+O` during a session for verbose mode
 
+## Contributing / Development
+
+### Local Development Setup
+
+Claude Code caches marketplace plugins, so use `--plugin-dir` for development:
+
+```bash
+# Clone and test locally (bypasses cache)
+git clone https://github.com/jamstop/claude-code-nostalgia-sounds.git
+claude --plugin-dir ./claude-code-nostalgia-sounds/plugins/nostalgia-sounds
+```
+
+### If You Have Both Versions Installed
+
+Edit `~/.claude/settings.json` to disable the marketplace version:
+
+```json
+{
+  "enabledPlugins": {
+    "nostalgia-sounds@/path/to/local/plugins/nostalgia-sounds": true,
+    "nostalgia-sounds@nostalgia-sounds-marketplace": false
+  }
+}
+```
+
+### Submitting Changes
+
+1. Fork the repo and create a feature branch
+2. Make changes and run tests: `./plugins/nostalgia-sounds/test.sh`
+3. Submit a PR with a conventional commit message:
+   - `feat: add new sound pack` → minor version bump
+   - `fix: improve cleanup reliability` → patch version bump
+4. Version bumps happen automatically on merge to `main`
+
+## Cleanup Architecture
+
+Claude Code hooks don't always fire reliably (especially `Stop` and `SessionEnd`), which can leave orphaned audio processes. This plugin uses a **defense-in-depth** approach to ensure sounds always stop:
+
+### 1. Startup Cleanup (Most Reliable)
+Every time you submit a prompt, `play-dialup.sh` first kills any stray audio processes from previous sessions before starting new sounds. This is the most reliable cleanup mechanism.
+
+### 2. Parent Process Monitoring (Self-Terminating)
+The thinking loop monitors its parent process every 5 seconds. If Claude exits (gracefully or via Ctrl+C), the audio process detects it's orphaned and terminates itself.
+
+### 3. Safety Timeout
+A 3-minute maximum duration ensures sounds eventually stop even if all other mechanisms fail.
+
+### 4. SessionEnd Hook (Belt and Suspenders)
+When Claude properly fires the `SessionEnd` hook, `play-session-end.sh` aggressively kills all audio processes before playing the shutdown sound.
+
+### 5. Stop Hook
+When Claude finishes responding (if the hook fires), `play-done.sh` stops thinking sounds and plays the completion sound.
+
+### Why This Matters
+Hook reliability is a [known limitation](https://github.com/anthropics/claude-code/issues/6428) in Claude Code. Even official Anthropic plugins avoid relying solely on hooks for cleanup. The patterns above follow best practices from the Claude Code community.
+
 ## Known Limitations
 
-### Ctrl+C Interrupt Detection
+### Hook Reliability
 
-**The `Stop` hook does not fire on user interrupts.** This is a documented Claude Code limitation.
+**The `Stop` and `SessionEnd` hooks don't always fire.** This is a documented Claude Code limitation.
 
-When you press Ctrl+C:
-- The thinking sounds will continue playing briefly
-- A 10-minute safety timeout ensures sounds eventually stop
-- Sounds will stop on your next prompt submission
+The plugin handles this through multiple fallback mechanisms (see Cleanup Architecture above), but you may occasionally need manual cleanup:
+
+```bash
+# Kill any stray audio processes
+pkill -f "afplay.*nostalgia-sounds"
+pkill -f "play-dialup.sh"
+rm -f /tmp/claude-nostalgia-*
+```
 
 ### Workaround: Wrapper Script
+
+For guaranteed cleanup on Ctrl+C, use a wrapper script:
 
 ```bash
 #!/bin/bash
