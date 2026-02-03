@@ -11,7 +11,6 @@
       "win95_startup.wav",
       "win98_startup.mp3",
       "winxp_startup.mp3",
-      "vinyl_scratch.mp3",
       "programmer_startup.mp3",
       "duck_startup.mp3"
     ],
@@ -92,7 +91,7 @@
         "startup": "intel_bong.wav",
         "shutdown": "piano_sting.mp3",
         "thinking": [
-          "vinyl_scratch.mp3",
+          "dialup.mp3",
           "smooth_jazz.mp3"
         ],
         "done": "piano_sting.mp3",
@@ -103,10 +102,10 @@
       "name": "DJ / 808",
       "description": "Air horns, bass drops, and trap beats",
       "sounds": {
-        "startup": "vinyl_scratch.mp3",
+        "startup": "air_horn.mp3",
         "shutdown": "record_scratch.mp3",
         "thinking": [
-          "vinyl_scratch.mp3",
+          "dialup.mp3",
           "trap_beat.mp3"
         ],
         "done": "air_horn.mp3",
