@@ -122,6 +122,36 @@ if [ "$STRAY_COUNT" -gt 0 ]; then
 fi
 
 echo ""
+echo "Version Check:"
+echo ""
+
+# Get current version from plugin.json
+PLUGIN_JSON="$SCRIPT_DIR/../.claude-plugin/plugin.json"
+if [ -f "$PLUGIN_JSON" ] && command -v jq &>/dev/null; then
+    CURRENT_VERSION=$(jq -r '.version' "$PLUGIN_JSON" 2>/dev/null)
+    echo "    Installed: $CURRENT_VERSION"
+
+    # Check latest version from GitHub (with timeout)
+    LATEST_VERSION=$(curl -s --max-time 5 \
+        "https://raw.githubusercontent.com/jamstop/claude-code-nostalgia-sounds/main/plugins/nostalgia-sounds/.claude-plugin/plugin.json" \
+        2>/dev/null | jq -r '.version' 2>/dev/null)
+
+    if [ -n "$LATEST_VERSION" ] && [ "$LATEST_VERSION" != "null" ]; then
+        echo "    Latest:    $LATEST_VERSION"
+        if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
+            warn "Update available: $CURRENT_VERSION → $LATEST_VERSION"
+            echo "    Run: /plugin marketplace update nostalgia-sounds-marketplace"
+        else
+            pass "You're on the latest version"
+        fi
+    else
+        warn "Could not check for updates (network issue?)"
+    fi
+else
+    warn "Could not determine current version"
+fi
+
+echo ""
 echo "---"
 if [ $ISSUES -eq 0 ]; then
     echo -e "${GREEN}All required dependencies OK!${NC}"

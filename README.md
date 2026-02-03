@@ -14,6 +14,20 @@
 /plugin install nostalgia-sounds@nostalgia-sounds-marketplace
 ```
 
+### Automatic Updates
+
+To receive automatic updates, enable auto-update for this marketplace:
+
+1. Run `/plugin` in Claude Code
+2. Go to the **Marketplaces** tab
+3. Find `nostalgia-sounds-marketplace`
+4. Enable **Auto-update**
+
+Or manually update anytime with:
+```bash
+/plugin marketplace update nostalgia-sounds-marketplace
+```
+
 ### Option 2: Development / Testing
 
 ```bash
