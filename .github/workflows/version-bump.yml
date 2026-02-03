@@ -21,23 +21,85 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get commit message
+      - name: Determine version bump
         id: commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Only get first line (subject) to avoid multiline output issues
-          MESSAGE=$(git log -1 --pretty=%s)
-          echo "message=$MESSAGE" >> $GITHUB_OUTPUT
+          # Function to check message for conventional commit type
+          get_bump_type() {
+            local msg="$1"
+            if echo "$msg" | grep -qE "^feat(\(.+\))?!:|^BREAKING CHANGE:"; then
+              echo "major"
+            elif echo "$msg" | grep -qE "^feat(\(.+\))?:"; then
+              echo "minor"
+            elif echo "$msg" | grep -qE "^fix(\(.+\))?:|^docs(\(.+\))?:|^chore(\(.+\))?:|^refactor(\(.+\))?:"; then
+              echo "patch"
+            else
+              echo "none"
+            fi
+          }
 
-          # Determine bump type from conventional commit prefix
-          if echo "$MESSAGE" | grep -qE "^feat(\(.+\))?!:|^BREAKING CHANGE:"; then
-            echo "bump=major" >> $GITHUB_OUTPUT
-          elif echo "$MESSAGE" | grep -qE "^feat(\(.+\))?:"; then
-            echo "bump=minor" >> $GITHUB_OUTPUT
-          elif echo "$MESSAGE" | grep -qE "^fix(\(.+\))?:|^docs(\(.+\))?:|^chore(\(.+\))?:|^refactor(\(.+\))?:"; then
-            echo "bump=patch" >> $GITHUB_OUTPUT
-          else
-            echo "bump=none" >> $GITHUB_OUTPUT
+          # Function to get highest priority bump (major > minor > patch > none)
+          highest_bump() {
+            local current="$1"
+            local new="$2"
+            case "$current" in
+              major) echo "major" ;;
+              minor) [[ "$new" == "major" ]] && echo "major" || echo "minor" ;;
+              patch) [[ "$new" == "major" ]] && echo "major" || [[ "$new" == "minor" ]] && echo "minor" || echo "patch" ;;
+              *) echo "$new" ;;
+            esac
+          }
+
+          BUMP="none"
+          MERGE_COMMIT_MSG=$(git log -1 --pretty=%s)
+          echo "Merge commit message: $MERGE_COMMIT_MSG"
+
+          # 1. Check merge commit message itself
+          BUMP=$(highest_bump "$BUMP" "$(get_bump_type "$MERGE_COMMIT_MSG")")
+          echo "After merge commit check: $BUMP"
+
+          # 2. If this is a PR merge, get the PR title
+          if echo "$MERGE_COMMIT_MSG" | grep -qE "^Merge pull request #[0-9]+"; then
+            PR_NUM=$(echo "$MERGE_COMMIT_MSG" | grep -oE "#[0-9]+" | head -1 | tr -d '#')
+            echo "Detected PR #$PR_NUM"
+
+            PR_TITLE=$(gh pr view "$PR_NUM" --json title --jq '.title' 2>/dev/null || echo "")
+            if [ -n "$PR_TITLE" ]; then
+              echo "PR title: $PR_TITLE"
+              BUMP=$(highest_bump "$BUMP" "$(get_bump_type "$PR_TITLE")")
+              echo "After PR title check: $BUMP"
+            fi
           fi
+
+          # 3. Check all commits in the push (for squash merges or direct pushes)
+          # Get commits between previous HEAD and current HEAD
+          PREV_SHA=$(git rev-parse HEAD~1 2>/dev/null || echo "")
+          if [ -n "$PREV_SHA" ]; then
+            echo "Checking individual commits..."
+            while IFS= read -r commit_msg; do
+              [ -z "$commit_msg" ] && continue
+              echo "  Commit: $commit_msg"
+              BUMP=$(highest_bump "$BUMP" "$(get_bump_type "$commit_msg")")
+            done < <(git log --pretty=%s HEAD~1..HEAD 2>/dev/null)
+            echo "After individual commits check: $BUMP"
+          fi
+
+          # 4. For merge commits, also check the commits that were merged
+          MERGE_BASE=$(git merge-base HEAD~1 HEAD 2>/dev/null || echo "")
+          if [ -n "$MERGE_BASE" ] && [ "$MERGE_BASE" != "$(git rev-parse HEAD~1)" ]; then
+            echo "Checking merged branch commits..."
+            while IFS= read -r commit_msg; do
+              [ -z "$commit_msg" ] && continue
+              echo "  Merged commit: $commit_msg"
+              BUMP=$(highest_bump "$BUMP" "$(get_bump_type "$commit_msg")")
+            done < <(git log --pretty=%s "$MERGE_BASE"..HEAD~1 2>/dev/null)
+            echo "After merged commits check: $BUMP"
+          fi
+
+          echo "Final bump type: $BUMP"
+          echo "bump=$BUMP" >> $GITHUB_OUTPUT
 
       - name: Bump version
         if: steps.commit.outputs.bump != 'none'
