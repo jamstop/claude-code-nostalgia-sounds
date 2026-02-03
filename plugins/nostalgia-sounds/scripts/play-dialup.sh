@@ -15,7 +15,7 @@ source "$SCRIPT_DIR/audio-cmd.sh" 2>/dev/null
 USER_SETTINGS_FILE="$HOME/.config/nostalgia-sounds/settings.json"
 
 # Check if random mode is enabled (user settings first, then config defaults)
-RANDOM_MODE="false"
+RANDOM_MODE=""
 if command -v jq &>/dev/null; then
     # Check user settings first
     if [ -f "$USER_SETTINGS_FILE" ]; then
@@ -25,10 +25,12 @@ if command -v jq &>/dev/null; then
         fi
     fi
     # Fall back to config.json default if not set in user settings
-    if [ "$RANDOM_MODE" = "false" ] && [ -f "$CONFIG_FILE" ]; then
+    if [ -z "$RANDOM_MODE" ] && [ -f "$CONFIG_FILE" ]; then
         RANDOM_MODE=$(jq -r '.randomMode // false' "$CONFIG_FILE")
     fi
 fi
+# Default to false if still not set
+[ -z "$RANDOM_MODE" ] && RANDOM_MODE="false"
 
 # Graceful cleanup of existing sounds
 if [ -f "$PID_FILE" ]; then
