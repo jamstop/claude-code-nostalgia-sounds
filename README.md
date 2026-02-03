@@ -28,6 +28,20 @@ Or manually update anytime with:
 /plugin marketplace update nostalgia-sounds-marketplace
 ```
 
+### Manual Update with Cache Clear
+
+If updates aren't taking effect (due to [Claude Code cache issues](https://github.com/anthropics/claude-code/issues/14061)), use the update script:
+
+```bash
+# Find your plugin directory
+PLUGIN_DIR=$(find ~/.claude/plugins -path "*/nostalgia-sounds/scripts" -type d 2>/dev/null | head -1)
+
+# Run the update script
+$PLUGIN_DIR/update.sh
+```
+
+This clears the cache and pulls the latest version. Restart Claude Code after updating.
+
 ### Option 2: Development / Testing
 
 ```bash
