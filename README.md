@@ -1,6 +1,6 @@
 # Nostalgia Sounds Plugin for Claude Code
 
-A plugin that brings back the nostalgic sounds of the dial-up internet era to your Claude Code experience.
+🎵 A plugin that brings back the nostalgic sounds of the dial-up internet era to your Claude Code experience.
 
 ## Installation
 
