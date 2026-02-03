@@ -49,7 +49,8 @@
       "air_horn.mp3",
       "bass_drop.mp3",
       "piano_sting.mp3",
-      "wow_dj.mp3"
+      "wow_dj.mp3",
+      "fart.mp3"
     ],
     "notification": [
       "ding.wav",
@@ -58,7 +59,8 @@
       "sonic_ring.wav",
       "youve_got_mail.mp3",
       "air_horn.mp3",
-      "wow_dj.mp3"
+      "wow_dj.mp3",
+      "fart.mp3"
     ]
   },
   "packs": {
@@ -172,6 +174,20 @@
         ],
         "done": "mgs_alert.wav",
         "notification": "mgs_alert.wav"
+      }
+    },
+    "fart": {
+      "name": "Fart Mode",
+      "description": "For those who appreciate bathroom humor in their dev workflow",
+      "sounds": {
+        "startup": "fart.mp3",
+        "shutdown": "fart.mp3",
+        "thinking": [
+          "fart.mp3",
+          "jeopardy_think_real.mp3"
+        ],
+        "done": "fart.mp3",
+        "notification": "fart.mp3"
       }
     }
   }
