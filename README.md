@@ -393,6 +393,25 @@ pkill -f "audio-manager.sh"
 rm -f /tmp/claude-nostalgia-*
 ```
 
+### Plugin not updating / old version still running
+
+Claude Code has a [known cache issue](https://github.com/anthropics/claude-code/issues/14061) where old plugin versions accumulate and may not be replaced when updating. If you're stuck on an old version:
+
+```bash
+# 1. Check your installed version
+~/.claude/plugins/cache/nostalgia-sounds-marketplace/nostalgia-sounds/*/scripts/doctor.sh
+
+# 2. Clear the plugin cache
+rm -rf ~/.claude/plugins/cache/nostalgia-sounds-marketplace
+
+# 3. Update the marketplace
+/plugin marketplace update nostalgia-sounds-marketplace
+
+# 4. Restart Claude Code
+```
+
+This is a Claude Code limitation ([#16453](https://github.com/anthropics/claude-code/issues/16453), [#15369](https://github.com/anthropics/claude-code/issues/15369)), not a plugin issue. To avoid manual cleanup, enable auto-updates for this marketplace (see Installation section).
+
 ## Repository Structure
 
 ```
