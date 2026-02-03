@@ -24,7 +24,8 @@ jobs:
       - name: Get commit message
         id: commit
         run: |
-          MESSAGE=$(git log -1 --pretty=%B)
+          # Only get first line (subject) to avoid multiline output issues
+          MESSAGE=$(git log -1 --pretty=%s)
           echo "message=$MESSAGE" >> $GITHUB_OUTPUT
 
           # Determine bump type from conventional commit prefix
