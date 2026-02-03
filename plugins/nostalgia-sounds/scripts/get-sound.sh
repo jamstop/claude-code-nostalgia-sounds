@@ -8,6 +8,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="$SCRIPT_DIR/../config.json"
 SOUNDS_DIR="$SCRIPT_DIR/../sounds"
 
+# User settings stored separately (not checked into git)
+USER_SETTINGS_DIR="$HOME/.config/nostalgia-sounds"
+USER_SETTINGS_FILE="$USER_SETTINGS_DIR/settings.json"
+
 EVENT="${1:-}"
 INDEX="${2:-0}"
 
@@ -39,8 +43,33 @@ if ! command -v jq &>/dev/null; then
     exit 0
 fi
 
+# Read user settings (if exists), fall back to config defaults
+get_setting() {
+    local key="$1"
+    local default="$2"
+
+    # Try user settings first
+    if [ -f "$USER_SETTINGS_FILE" ]; then
+        local value=$(jq -r ".$key // empty" "$USER_SETTINGS_FILE" 2>/dev/null)
+        if [ -n "$value" ] && [ "$value" != "null" ]; then
+            echo "$value"
+            return
+        fi
+    fi
+
+    # Fall back to config.json defaults
+    local value=$(jq -r ".$key // empty" "$CONFIG_FILE" 2>/dev/null)
+    if [ -n "$value" ] && [ "$value" != "null" ]; then
+        echo "$value"
+        return
+    fi
+
+    # Use provided default
+    echo "$default"
+}
+
 # Check if random mode is enabled
-RANDOM_MODE=$(jq -r '.randomMode // false' "$CONFIG_FILE")
+RANDOM_MODE=$(get_setting "randomMode" "false")
 
 if [ "$RANDOM_MODE" = "true" ]; then
     # Random mode: pick from category
@@ -73,7 +102,7 @@ if [ "$RANDOM_MODE" = "true" ]; then
 fi
 
 # Get active pack
-ACTIVE_PACK=$(jq -r '.activePack // "default"' "$CONFIG_FILE")
+ACTIVE_PACK=$(get_setting "activePack" "default")
 
 # Get sound for event
 SOUND=$(jq -r --arg pack "$ACTIVE_PACK" --arg event "$EVENT" --argjson idx "$INDEX" '

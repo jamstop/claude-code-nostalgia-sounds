@@ -32,14 +32,26 @@ By default, **Random Mode is enabled**. Each sound event picks a random sound fr
 
 | Event | When it plays | Example sounds |
 |-------|---------------|----------------|
-| **startup** | Session start | Windows XP, Mac, GameBoy, PS1, SEGA, vinyl scratch |
+| **startup** | Session start | Windows XP, Mac, GameBoy, PS1, SEGA |
 | **shutdown** | Session end | Windows shutdown, record scratch |
-| **thinking** | User submits prompt | Dialup modem, vinyl scratch |
-| **thinkingLoop** | While Claude thinks | Jeopardy, elevator music, bossa nova, smooth jazz, trap beats |
+| **thinking** | User submits prompt | Dialup modem |
+| **thinkingLoop** | While Claude thinks (loops continuously) | Jeopardy, elevator music, bossa nova, smooth jazz, trap beats |
 | **done** | Claude finishes | "You've Got Mail!", Zelda secret, air horn, bass drop |
 | **notification** | Claude notifications | Various alert sounds, air horn |
 
-In random mode, thinking plays a dialup/vinyl sound followed by a random thinking loop (jeopardy, jazz, trap, etc.).
+In random mode, thinking plays a dialup sound followed by random thinking loops that continue until Claude finishes.
+
+## User Settings
+
+Your personal preferences are stored separately from the plugin code in `~/.config/nostalgia-sounds/settings.json`. This means:
+
+- **Your settings won't be overwritten** when the plugin updates
+- **You won't accidentally commit** your personal preferences to git
+- **Multiple users** can have different settings on the same machine
+
+Settings you can customize:
+- `randomMode` - true/false
+- `activePack` - which sound pack to use
 
 ## Adding New Sounds
 
@@ -61,7 +73,7 @@ Edit `config.json` and add your sound to the appropriate category in `soundCateg
     "done": [
       "ding.wav",
       "mario_coin.wav",
-      "my-cool-sound.mp3"  // Add your sound here
+      "my-cool-sound.mp3"
     ]
   }
 }
@@ -84,7 +96,7 @@ ffmpeg -i my-sound.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -ar 44100 my-sound-norm
 | `startup` | Session start sounds |
 | `shutdown` | Session end sounds |
 | `thinking` | Initial "connecting" sounds (dialup) |
-| `thinkingLoop` | Looping wait music (jeopardy) |
+| `thinkingLoop` | Looping wait music (jeopardy, jazz, etc.) |
 | `done` | Completion/success sounds |
 | `notification` | Alert/notification sounds |
 
@@ -96,24 +108,29 @@ Random mode is **on by default**. To toggle:
 
 ```bash
 # Find your plugin installation
-PLUGIN_DIR=$(find ~/.claude/plugins -name "nostalgia-sounds" -type d | grep -v cache | head -1)
+PLUGIN_DIR=~/.claude/plugins/cache/nostalgia-sounds-marketplace/nostalgia-sounds/*/scripts
 
 # Toggle random mode
-$PLUGIN_DIR/scripts/toggle-random.sh
+$PLUGIN_DIR/toggle-random.sh
 
 # Or explicitly set it
-$PLUGIN_DIR/scripts/toggle-random.sh on
-$PLUGIN_DIR/scripts/toggle-random.sh off
+$PLUGIN_DIR/toggle-random.sh on
+$PLUGIN_DIR/toggle-random.sh off
 ```
 
-Or edit `config.json`:
-```json
-{
-  "randomMode": true
-}
+Settings are saved to `~/.config/nostalgia-sounds/settings.json`.
+
+### Changing Sound Packs
+
+```bash
+# List available packs
+$PLUGIN_DIR/set-pack.sh
+
+# Switch to a pack
+$PLUGIN_DIR/set-pack.sh nintendo
 ```
 
-## Sound Packs (Non-Random Mode)
+## Sound Packs
 
 If you disable random mode, you can use curated sound packs instead:
 
@@ -127,24 +144,6 @@ If you disable random mode, you can use curated sound packs instead:
 | **mac** | Classic Mac - Macintosh startup sounds |
 | **windows95** | Windows 95 - The original Windows experience |
 | **mgs** | Metal Gear Solid - PS1 startup, alert sounds |
-
-### Changing Sound Packs
-
-```bash
-# List available packs
-$PLUGIN_DIR/scripts/set-pack.sh
-
-# Switch to a pack
-$PLUGIN_DIR/scripts/set-pack.sh nintendo
-```
-
-Or edit `config.json`:
-```json
-{
-  "activePack": "nintendo",
-  "randomMode": false
-}
-```
 
 ### Creating Custom Packs
 
@@ -170,10 +169,32 @@ Add your own pack to `config.json`:
 
 **Note:** Custom pack sounds should also be added to `soundCategories` so they're included when random mode is enabled.
 
+## Advanced Features
+
+### Audio Manager (Auto-started)
+
+The plugin includes a long-running audio manager daemon that:
+- Reduces process spawning/killing overhead
+- Provides smoother audio transitions
+- Uses graceful signal handling to prevent audio glitches
+
+The manager starts automatically with your Claude session.
+
+### Sox Crossfading (Optional)
+
+For smoother transitions between thinking loop sounds, install sox:
+
+```bash
+brew install sox
+```
+
+When sox is available, the audio manager will use fade-in/fade-out effects between sounds.
+
 ## Requirements
 
 - **macOS** (uses `afplay` for audio playback)
 - **jq** (for configuration): `brew install jq`
+- **sox** (optional, for crossfading): `brew install sox`
 - **ffmpeg** (optional, for normalizing sounds): `brew install ffmpeg`
 
 ## Testing
@@ -194,7 +215,8 @@ For live debugging:
 **The `Stop` hook does not fire on user interrupts.** This is a documented Claude Code limitation.
 
 When you press Ctrl+C:
-- The thinking sounds will continue playing
+- The thinking sounds will continue playing briefly
+- A 10-minute safety timeout ensures sounds eventually stop
 - Sounds will stop on your next prompt submission
 
 ### Workaround: Wrapper Script
@@ -205,7 +227,7 @@ When you press Ctrl+C:
 # chmod +x ~/bin/claude-sounds
 
 cleanup() {
-    pkill -9 -f "afplay.*nostalgia-sounds" 2>/dev/null
+    pkill -f "afplay.*nostalgia-sounds" 2>/dev/null
     kill -INT "$PID" 2>/dev/null
     exit 130
 }
@@ -244,6 +266,17 @@ Uninstall duplicates if present.
 ### Can't change configuration
 Install jq: `brew install jq`
 
+### Audio glitches or system audio issues
+The plugin uses graceful signal handling (SIGTERM before SIGKILL) to prevent audio issues. If you experience problems:
+```bash
+# Kill any stray audio processes
+pkill -f "afplay.*nostalgia-sounds"
+pkill -f "audio-manager.sh"
+
+# Remove stale files
+rm -f /tmp/claude-nostalgia-*
+```
+
 ## Repository Structure
 
 ```
@@ -255,17 +288,20 @@ claude-code-nostalgia-sounds/
     └── nostalgia-sounds/      # The actual plugin
         ├── .claude-plugin/
         │   └── plugin.json    # Plugin manifest
-        ├── config.json        # Sound pack configuration
+        ├── config.json        # Sound pack configuration (defaults)
         ├── test.sh            # Test suite
         ├── hooks/
         │   └── hooks.json     # Hook configuration
         ├── scripts/
-        │   ├── get-sound.sh
-        │   ├── set-pack.sh
-        │   ├── toggle-random.sh
-        │   ├── play-dialup.sh
-        │   ├── play-done.sh
-        │   ├── play-mail.sh
+        │   ├── audio-cmd.sh       # Audio helper functions
+        │   ├── audio-manager.sh   # Long-running audio daemon
+        │   ├── get-sound.sh       # Sound file resolution
+        │   ├── set-pack.sh        # Change active pack
+        │   ├── toggle-random.sh   # Toggle random mode
+        │   ├── play-dialup.sh     # Thinking sounds (loops)
+        │   ├── play-done.sh       # Done sound
+        │   ├── play-mail.sh       # Notification sound
+        │   ├── stop-thinking.sh   # Stop thinking sounds
         │   ├── play-session-start.sh
         │   └── play-session-end.sh
         └── sounds/
@@ -273,6 +309,9 @@ claude-code-nostalgia-sounds/
             ├── jeopardy_think_real.mp3
             ├── youve_got_mail.mp3
             └── ...            # 30+ sound files
+
+~/.config/nostalgia-sounds/    # User settings (not in repo)
+    └── settings.json          # Your personal preferences
 ```
 
 ## License
