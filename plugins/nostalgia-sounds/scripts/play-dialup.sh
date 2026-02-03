@@ -8,24 +8,47 @@ MAX_DURATION=600  # Safety timeout: 10 minutes max
 
 command -v afplay &>/dev/null || exit 0
 
-# Check if random mode is enabled
-RANDOM_MODE="false"
-if command -v jq &>/dev/null && [ -f "$CONFIG_FILE" ]; then
-    RANDOM_MODE=$(jq -r '.randomMode // false' "$CONFIG_FILE")
-fi
+# Source helper functions
+source "$SCRIPT_DIR/audio-cmd.sh" 2>/dev/null
 
-# Kill any existing thinking sounds (subshell + afplay)
+# User settings stored separately (not checked into git)
+USER_SETTINGS_FILE="$HOME/.config/nostalgia-sounds/settings.json"
+
+# Check if random mode is enabled (user settings first, then config defaults)
+RANDOM_MODE=""
+if command -v jq &>/dev/null; then
+    # Check user settings first
+    if [ -f "$USER_SETTINGS_FILE" ]; then
+        USER_RANDOM=$(jq -r '.randomMode // empty' "$USER_SETTINGS_FILE" 2>/dev/null)
+        if [ -n "$USER_RANDOM" ] && [ "$USER_RANDOM" != "null" ]; then
+            RANDOM_MODE="$USER_RANDOM"
+        fi
+    fi
+    # Fall back to config.json default if not set in user settings
+    if [ -z "$RANDOM_MODE" ] && [ -f "$CONFIG_FILE" ]; then
+        RANDOM_MODE=$(jq -r '.randomMode // false' "$CONFIG_FILE")
+    fi
+fi
+# Default to false if still not set
+[ -z "$RANDOM_MODE" ] && RANDOM_MODE="false"
+
+# Graceful cleanup of existing sounds
 if [ -f "$PID_FILE" ]; then
     OLD_PID=$(cat "$PID_FILE" 2>/dev/null)
     if [ -n "$OLD_PID" ]; then
-        pkill -9 -P "$OLD_PID" 2>/dev/null || true
-        kill -9 "$OLD_PID" 2>/dev/null || true
+        # Kill children first (afplay), then parent
+        for child in $(pgrep -P "$OLD_PID" 2>/dev/null); do
+            graceful_kill "$child" 2>/dev/null
+        done
+        graceful_kill "$OLD_PID" 2>/dev/null
     fi
     rm -f "$PID_FILE"
 fi
 
-# Also kill any stray afplay processes from this plugin
-pkill -9 -f "afplay.*nostalgia-sounds" 2>/dev/null || true
+# Graceful kill any stray afplay from this plugin
+for pid in $(pgrep -f "afplay.*nostalgia-sounds" 2>/dev/null); do
+    graceful_kill "$pid" 2>/dev/null
+done
 
 # Clear any previous stop flag
 rm -f "$STOP_FILE"
