@@ -12,7 +12,8 @@
       "win98_startup.mp3",
       "winxp_startup.mp3",
       "vinyl_scratch.mp3",
-      "programmer_startup.mp3"
+      "programmer_startup.mp3",
+      "duck_startup.mp3"
     ],
     "shutdown": [
       "mac_sosumi.wav",
@@ -21,12 +22,14 @@
       "win95_shutdown.wav",
       "winxp_shutdown.mp3",
       "record_scratch.mp3",
-      "programmer_shutdown.mp3"
+      "programmer_shutdown.mp3",
+      "duck_shutdown.mp3"
     ],
     "thinking": [
       "dialup.mp3",
       "dialup_15s.mp3",
-      "programmer_thinking.mp3"
+      "programmer_thinking.mp3",
+      "duck_thinking.mp3"
     ],
     "thinkingLoop": [
       "jeopardy_think_real.mp3",
@@ -35,7 +38,8 @@
       "smooth_jazz.mp3",
       "lounge_music.mp3",
       "trap_beat.mp3",
-      "programmer_thinking_long.mp3"
+      "programmer_thinking_long.mp3",
+      "duck_thinking_long.mp3"
     ],
     "done": [
       "ding.wav",
@@ -50,7 +54,8 @@
       "piano_sting.mp3",
       "wow_dj.mp3",
       "fart.mp3",
-      "programmer_done.mp3"
+      "programmer_done.mp3",
+      "duck_done.mp3"
     ],
     "notification": [
       "ding.wav",
@@ -61,7 +66,8 @@
       "air_horn.mp3",
       "wow_dj.mp3",
       "fart.mp3",
-      "programmer_notification.mp3"
+      "programmer_notification.mp3",
+      "duck_notification.mp3"
     ]
   },
   "packs": {
@@ -203,6 +209,20 @@
         ],
         "done": "programmer_done.mp3",
         "notification": "programmer_notification.mp3"
+      }
+    },
+    "duck": {
+      "name": "Duck Mode",
+      "description": "Quack your way through coding sessions 🦆",
+      "sounds": {
+        "startup": "duck_startup.mp3",
+        "shutdown": "duck_shutdown.mp3",
+        "thinking": [
+          "duck_thinking.mp3",
+          "duck_thinking_long.mp3"
+        ],
+        "done": "duck_done.mp3",
+        "notification": "duck_notification.mp3"
       }
     }
   }
