@@ -1,0 +1,88 @@
+name: Auto Version Bump
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'plugins/**'
+      - 'README.md'
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get commit message
+        id: commit
+        run: |
+          MESSAGE=$(git log -1 --pretty=%B)
+          echo "message=$MESSAGE" >> $GITHUB_OUTPUT
+
+          # Determine bump type from conventional commit prefix
+          if echo "$MESSAGE" | grep -qE "^feat(\(.+\))?!:|^BREAKING CHANGE:"; then
+            echo "bump=major" >> $GITHUB_OUTPUT
+          elif echo "$MESSAGE" | grep -qE "^feat(\(.+\))?:"; then
+            echo "bump=minor" >> $GITHUB_OUTPUT
+          elif echo "$MESSAGE" | grep -qE "^fix(\(.+\))?:|^docs(\(.+\))?:|^chore(\(.+\))?:|^refactor(\(.+\))?:"; then
+            echo "bump=patch" >> $GITHUB_OUTPUT
+          else
+            echo "bump=none" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump version
+        if: steps.commit.outputs.bump != 'none'
+        run: |
+          BUMP_TYPE="${{ steps.commit.outputs.bump }}"
+
+          # Get current version from plugin.json
+          CURRENT=$(jq -r '.version' plugins/nostalgia-sounds/.claude-plugin/plugin.json)
+
+          # Parse version components
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+          # Bump appropriate component
+          case "$BUMP_TYPE" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "Bumping $CURRENT → $NEW_VERSION ($BUMP_TYPE)"
+
+          # Update plugin.json
+          jq --arg v "$NEW_VERSION" '.version = $v' plugins/nostalgia-sounds/.claude-plugin/plugin.json > tmp.json
+          mv tmp.json plugins/nostalgia-sounds/.claude-plugin/plugin.json
+
+          # Update marketplace.json
+          jq --arg v "$NEW_VERSION" '.plugins[0].version = $v' .claude-plugin/marketplace.json > tmp.json
+          mv tmp.json .claude-plugin/marketplace.json
+
+          echo "new_version=$NEW_VERSION" >> $GITHUB_ENV
+
+      - name: Commit version bump
+        if: steps.commit.outputs.bump != 'none'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add plugins/nostalgia-sounds/.claude-plugin/plugin.json .claude-plugin/marketplace.json
+          git commit -m "chore: bump version to ${{ env.new_version }} [skip ci]"
+          git push
