@@ -1,6 +1,6 @@
 {
-  "activePack": "default",
-  "randomMode": true,
+  "activePack": "duck",
+  "randomMode": false,
   "soundCategories": {
     "startup": [
       "gameboy_startup.wav",
