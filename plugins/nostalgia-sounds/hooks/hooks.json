@@ -47,7 +47,17 @@
     ],
     "Notification": [
       {
-        "matcher": "*",
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/play-mail.sh",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "elicitation_dialog",
         "hooks": [
           {
             "type": "command",

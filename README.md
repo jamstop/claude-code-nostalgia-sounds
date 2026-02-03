@@ -50,10 +50,24 @@ By default, **Random Mode is enabled**. Each sound event picks a random sound fr
 | **shutdown** | Session end | Windows shutdown, record scratch |
 | **thinking** | User submits prompt | Dialup modem |
 | **thinkingLoop** | While Claude thinks (loops continuously) | Jeopardy, elevator music, bossa nova, smooth jazz, trap beats |
-| **done** | Claude finishes | "You've Got Mail!", Zelda secret, air horn, bass drop |
-| **notification** | Claude notifications | Various alert sounds, air horn |
+| **done** | Claude finishes responding | "You've Got Mail!", Zelda secret, air horn, bass drop |
+| **notification** | Permission prompts, elicitation dialogs | Various alert sounds |
 
 In random mode, thinking plays a dialup sound followed by random thinking loops that continue until Claude finishes.
+
+### Hook Details
+
+The plugin uses Claude Code's [hook system](https://docs.anthropic.com/en/docs/claude-code/hooks) to trigger sounds:
+
+| Hook | Trigger | Notes |
+|------|---------|-------|
+| `SessionStart` | Claude session begins | Plays startup sound |
+| `SessionEnd` | Claude session ends | Cleans up + plays shutdown sound |
+| `UserPromptSubmit` | You send a message | Starts thinking sounds |
+| `Stop` | Claude finishes responding | Stops thinking + plays done sound |
+| `Notification` | Permission/elicitation prompts | Only these types (not idle prompts) |
+
+**Note:** We intentionally exclude `idle_prompt` notifications to avoid random sounds when Claude is inactive.
 
 ## User Settings
 
